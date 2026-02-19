@@ -1,0 +1,11 @@
+# Default experiment configuration
+# Override params.yaml values for specific experiments
+
+train:
+  model_type: "lightgbm"
+  lightgbm:
+    objective: "tweedie"
+    tweedie_variance_power: 1.5
+    learning_rate: 0.02
+    num_leaves: 255
+    n_estimators: 3000

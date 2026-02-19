@@ -1,0 +1,90 @@
+stages:
+  prepare:
+    cmd: poetry run favorita prepare
+    deps:
+      - src/favorita_forecasting/data/
+      - src/favorita_forecasting/preprocessing/
+      - src/favorita_forecasting/features/
+      - data/raw/train.csv
+      - data/raw/test.csv
+      - data/raw/stores.csv
+      - data/raw/items.csv
+      - data/raw/oil.csv
+      - data/raw/holidays_events.csv
+      - data/raw/transactions.csv
+      - params.yaml
+    params:
+      - features
+      - data
+    outs:
+      - data/processed/features_train.parquet
+      - data/processed/features_test.parquet
+
+  train:
+    cmd: poetry run favorita train --skip-cv
+    deps:
+      - src/favorita_forecasting/models/
+      - src/favorita_forecasting/evaluation/
+      - src/favorita_forecasting/pipeline/train_pipeline.py
+      - src/favorita_forecasting/tracking/
+      - data/processed/features_train.parquet
+    params:
+      - train.lightgbm
+      - train.cv_splits
+      - train.forecast_horizon
+      - data.min_train_date
+    outs:
+      - models/lightgbm_final.txt
+    metrics:
+      - metrics/cv_results_lightgbm.json:
+          cache: false
+      - metrics/lightgbm_importance.json:
+          cache: false
+
+  train-xgboost:
+    cmd: poetry run favorita train --model xgboost --skip-cv
+    deps:
+      - src/favorita_forecasting/models/
+      - src/favorita_forecasting/evaluation/
+      - src/favorita_forecasting/pipeline/train_pipeline.py
+      - src/favorita_forecasting/tracking/
+      - data/processed/features_train.parquet
+    params:
+      - train.xgboost
+      - train.cv_splits
+      - train.forecast_horizon
+      - data.min_train_date
+    outs:
+      - models/xgboost_final.json
+    metrics:
+      - metrics/cv_results_xgboost.json:
+          cache: false
+      - metrics/xgboost_importance.json:
+          cache: false
+
+  predict:
+    cmd: poetry run favorita predict
+    deps:
+      - src/favorita_forecasting/pipeline/predict_pipeline.py
+      - src/favorita_forecasting/pipeline/submission.py
+      - models/lightgbm_final.txt
+      - data/processed/features_test.parquet
+    outs:
+      - data/submissions/submission.csv
+
+  tune:
+    cmd: poetry run favorita tune
+    deps:
+      - src/favorita_forecasting/models/hyperopt.py
+      - src/favorita_forecasting/models/
+      - src/favorita_forecasting/evaluation/
+      - src/favorita_forecasting/pipeline/train_pipeline.py
+      - src/favorita_forecasting/tracking/
+      - data/processed/features_train.parquet
+    params:
+      - tuning
+      - train.lightgbm
+      - data.min_train_date
+    metrics:
+      - metrics/best_params_lightgbm.json:
+          cache: false

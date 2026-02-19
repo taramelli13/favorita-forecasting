@@ -1,0 +1,56 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environment
+.venv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Data (large files tracked by DVC)
+data/raw/*.csv
+data/raw/*.7z
+data/interim/
+data/processed/
+data/submissions/
+
+# Models
+models/*.txt
+models/*.json
+models/*.pkl
+
+# MLflow
+mlruns/
+mlflow.db
+
+# Optuna
+metrics/*.db
+
+# Environment
+.env
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Temp/log files
+*.log
+pipeline_log.txt
+train_log.txt
+gpu_check.txt
+test_out.txt
+features_info.txt
+
+# Claude Code
+.claude/
+CLAUDE.md

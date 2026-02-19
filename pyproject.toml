@@ -1,0 +1,86 @@
+[project]
+name = "favorita-forecasting"
+version = "0.1.0"
+description = "Time series forecasting for Corporacion Favorita grocery sales"
+authors = [
+    {name = "taramelli13", email = "nutriygortaramelli@gmail.com"}
+]
+requires-python = ">=3.13"
+license = {text = "MIT"}
+
+dependencies = [
+    # Data processing
+    "polars>=1.38.1,<2.0.0",
+    "pandas>=2.2.0,<4.0.0",
+    "numpy>=2.4.2,<3.0.0",
+    "pyarrow>=19.0.0",
+
+    # ML models
+    "lightgbm>=4.6.0",
+    "xgboost>=3.0.0",
+    "scikit-learn>=1.6.0",
+    "optuna>=4.2.0",
+
+    # Configuration & CLI
+    "pydantic>=2.11.0",
+    "pydantic-settings>=2.8.0",
+    "typer>=0.15.0",
+    "python-dotenv>=1.1.0",
+    "pyyaml>=6.0.2",
+
+    # Tracking
+    "mlflow>=3.1.0",
+
+    # MLOps
+    "dvc>=3.50.0",
+    "pathspec>=0.12.1,<1.0.0",  # DVC uses pathspec._DIR_MARK removed in 1.0
+
+    # Utilities
+    "structlog>=25.1.0",
+    "rich>=13.9.0",
+    "tqdm>=4.67.0",
+]
+
+[project.scripts]
+favorita = "favorita_forecasting.cli:app"
+
+[tool.poetry]
+packages = [{include = "favorita_forecasting", from = "src"}]
+
+[tool.poetry.group.dev.dependencies]
+pytest = ">=8.3.0"
+pytest-cov = ">=6.0.0"
+ruff = ">=0.11.0"
+mypy = ">=1.15.0"
+ipykernel = ">=6.29.0"
+matplotlib = ">=3.10.0"
+seaborn = ">=0.13.0"
+
+[tool.poetry.group.deploy.dependencies]
+fastapi = ">=0.115.0"
+uvicorn = ">=0.34.0"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+target-version = "py313"
+line-length = 100
+src = ["src"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+warn_return_any = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --tb=short"
+markers = [
+    "slow: marks tests as slow",
+    "integration: marks integration tests",
+]

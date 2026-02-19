@@ -1,0 +1,16 @@
+services:
+  app:
+    build: .
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./metrics:/app/metrics
+    entrypoint: ["poetry", "run", "favorita"]
+
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:latest
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./mlruns:/mlflow/mlruns
+    command: mlflow server --host 0.0.0.0 --backend-store-uri /mlflow/mlruns

@@ -1,0 +1,17 @@
+{
+  "model_type": "xgboost",
+  "best_value": 0.5209718495607376,
+  "best_params": {
+    "tweedie_variance_power": 1.6738851905475056,
+    "learning_rate": 0.020531333767099445,
+    "max_depth": 9,
+    "min_child_weight": 166,
+    "subsample": 0.8080917022324767,
+    "colsample_bytree": 0.6318777788489003,
+    "reg_alpha": 9.129504920964248e-06,
+    "reg_lambda": 1.5414624478593326
+  },
+  "n_trials_complete": 3,
+  "n_trials_pruned": 0,
+  "elapsed_seconds": 3928.5
+}
