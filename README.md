@@ -1,8 +1,22 @@
 # Favorita Forecasting 2.0
 
-Previsao de vendas diarias para a Corporacion Favorita, rede de supermercados do Equador com 54 lojas e ~4.100 produtos. Preve `unit_sales` num horizonte de 16 dias usando LightGBM e XGBoost.
+![Python](https://img.shields.io/badge/Python-3.13-3776AB?logo=python&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green)
+![Tests](https://img.shields.io/badge/Tests-18_passing-brightgreen)
+![LightGBM](https://img.shields.io/badge/LightGBM-4.6-9cf)
+![XGBoost](https://img.shields.io/badge/XGBoost-3.0-orange)
+![Polars](https://img.shields.io/badge/Polars-1.38-blue)
+
+Previsao de vendas diarias para a Corporacion Favorita, rede de supermercados do Equador com 54 lojas e ~4.100 produtos. Preve `unit_sales` num horizonte de 16 dias usando LightGBM e XGBoost com 90 features engenheiradas.
 
 Baseado na competicao [Kaggle Corporacion Favorita Grocery Sales Forecasting](https://www.kaggle.com/c/favorita-grocery-sales-forecasting).
+
+> Feature engineering levou o NWRMSLE de **0.8006** (baseline, 34 features) para **0.5236** (90 features), uma reducao de **34.6%**.
+>
+> | | Baseline | Modelo final | Variacao |
+> |---|---|---|---|
+> | Features | 34 (sem lags, sem rolling stats) | 90 (lags, rolling, target encoding, feriados, petroleo) | +56 features |
+> | CV Media NWRMSLE | 0.8006 | 0.5236 | **-34.6%** |
 
 ## Resultados
 
@@ -14,6 +28,8 @@ Baseado na competicao [Kaggle Corporacion Favorita Grocery Sales Forecasting](ht
 | XGBoost | 0.5235 | 0.5309 | 25.5 min | CUDA |
 
 Os dois modelos chegaram em ~0.5236. XGBoost foi ~5x mais rapido na GPU.
+
+![Resultados da validacao cruzada por fold](docs/images/results.png)
 
 <details>
 <summary>Detalhes por fold</summary>
@@ -27,11 +43,9 @@ Os dois modelos chegaram em ~0.5236. XGBoost foi ~5x mais rapido na GPU.
 
 </details>
 
-### Comparacao com baseline
-
-O baseline (34 features, sem lags nem rolling stats) marcou 0.8006 NWRMSLE. Depois da feature engineering o score caiu para 0.5236, uma reducao de 34.6%.
-
 ### Top 10 features (LightGBM gain)
+
+![Top 10 feature importance](docs/images/feature_importance.png)
 
 | # | Feature | Tipo |
 |---|---|---|
@@ -50,7 +64,7 @@ Target encodings e medias moveis dominam o ranking. O historico de vendas e o qu
 
 ## Dataset
 
-- Fonte: competicao Kaggle Corporacion Favorita
+- Fonte: competicao [Kaggle Corporacion Favorita](https://www.kaggle.com/c/favorita-grocery-sales-forecasting)
 - 125M linhas de dados de treino (2013-2017)
 - 54 lojas x ~4.100 itens no Equador
 - Target: `unit_sales` (unidades vendidas por dia por loja-item)
@@ -76,8 +90,8 @@ Os dados brutos de vendas mais 6 tabelas auxiliares (lojas, itens, preco do petr
 
 Os dois modelos usam o objetivo Tweedie (variance power 1.5), que se ajusta bem a distribuicao de vendas com muitos zeros e valores nao-negativos.
 
-- LightGBM: API nativa (`lgb.train()`), 255 folhas, CPU, early stopping em 100 rounds
-- XGBoost: API nativa (`xgb.train()`), max depth 8, CUDA, early stopping em 100 rounds
+- **LightGBM**: API nativa (`lgb.train()`), 255 folhas, CPU, early stopping em 100 rounds
+- **XGBoost**: API nativa (`xgb.train()`), max depth 8, CUDA, early stopping em 100 rounds
 
 ### Estrategia de validacao
 
@@ -94,7 +108,7 @@ Fold 4: Treina ate Jul 30  -> Valida Jul 31-Ago 15
 
 ### Encaixar 87M linhas x 90 features em 16 GB de RAM
 
-O conjunto completo de features nao cabe na memoria. Acabei com tres solucoes:
+O conjunto completo de features nao cabe na memoria. Tres solucoes resolveram:
 
 **Feature pipeline chunked** (`features/pipeline.py`). O Polars dava segfault ao rodar operacoes complexas de `.over()` nas 87M linhas. Processar uma loja por vez (54 lojas) e gravar cada pedaco em Parquet via PyArrow resolveu. Pico de memoria caiu de 60+ GB pra cerca de 1-2 GB por loja.
 
@@ -263,6 +277,15 @@ train:
     learning_rate: 0.02
     device: cuda
 ```
+
+## Roadmap
+
+- [ ] **Ensemble**: blend ponderado das predicoes LightGBM + XGBoost
+- [ ] **Optuna tuning**: 100+ trials por modelo usando o CV de janela expansiva
+- [ ] **Modelos neurais**: N-BEATS, Temporal Fusion Transformer (via PyTorch/Darts)
+- [ ] **Features temporais avancadas**: termos de Fourier, decomposicao wavelet
+- [ ] **Otimizacao de memoria**: quantizar features pra int8/float16 onde possivel
+- [ ] **Deploy via API**: servir predicoes com FastAPI + Docker
 
 ## Licenca
 

@@ -51,6 +51,6 @@ gpu_check.txt
 test_out.txt
 features_info.txt
 
-# Claude Code
+# IDE / tool config
 .claude/
 CLAUDE.md
